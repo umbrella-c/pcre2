@@ -1,0 +1,49 @@
+project: 
+  summary: libzip is a C library for reading, creating, and modifying zip archives
+  description: |
+    libzip is a C library for reading, creating, and modifying zip archives. Files can be added from data buffers, files, 
+    or compressed data copied directly from other zip archives. Changes made without closing the archive can be reverted.
+  author: Dieter Baron and Thomas Klausner
+  email: libzip@nih.at
+  version: 1.8.0
+  license: BSD
+  homepage: https://libzip.org/
+
+ingredients:
+- name: vali/clang-cc
+  platform: host
+  arch: host
+  channel: devel
+- name: vali/sdk-c
+  channel: devel
+- name: vali/sdk-cpp
+  channel: devel
+
+recipes:
+  - name: pcre2
+    path: /
+    toolchain: vali/clang-cc
+    steps:
+    - name: config
+      type: generate
+      system: cmake
+      arguments:
+        - -G
+        - '"Unix Makefiles"'
+        - -DPCRE2_BUILD_PCRE2GREP=OFF
+        - -DPCRE2_BUILD_TESTS=OFF
+        - -DCMAKE_TOOLCHAIN_FILE=${{ PROJECT_PATH }}/chef/Vali.cmake
+      env:
+        CROSS: ${{ TOOLCHAIN_PREFIX }}/usr/local
+        VALI_ARCH: ${{ CHEF_TARGET_ARCHITECTURE }}
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+    - name: build
+      type: build
+      depends: [config]
+      system: make
+      env:
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+
+packs:
+- name: libpcre2
+  type: ingredient
